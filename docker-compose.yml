@@ -1,0 +1,19 @@
+services:
+  ghost:
+    image: ghost:5-alpine
+    restart: always
+    ports:
+      - "2368:2368"
+    env_file:
+      - .env
+    volumes:
+      - ./content:/var/lib/ghost/content
+      - ./content/themes/kalp-dev:/var/lib/ghost/content/themes/kalp-dev
+
+  db:
+    image: mysql:8.0
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./db:/var/lib/mysql

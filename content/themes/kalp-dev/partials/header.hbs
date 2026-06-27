@@ -1,0 +1,23 @@
+<header class="site-nav">
+    <div class="container">
+        <a href="{{@site.url}}" class="site-nav__logo">
+            <img class="site-logo-icon" src="{{asset "images/spark.svg"}}" alt="" />
+            <span class="site-logo-text">kalp.dev</span>
+        </a>
+
+        <button class="nav-toggle" aria-label="Toggle navigation" onclick="document.querySelector('.site-nav__links').classList.toggle('open'); this.classList.toggle('open');">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav>
+            <ul class="site-nav__links">
+                <li><a href="{{@site.url}}/blog/">Blog</a></li>
+                <li><a href="{{@site.url}}/poetry/">Poetry</a></li>
+                <li><a href="{{@site.url}}/resume/">Resume</a></li>
+                <li><a href="{{@site.url}}/about/">About</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>

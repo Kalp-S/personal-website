@@ -1,0 +1,47 @@
+# =============================================================================
+# Secrets & credentials
+# =============================================================================
+.env
+*.pem
+*.key
+
+# =============================================================================
+# MySQL data volume
+# =============================================================================
+db/
+
+# =============================================================================
+# Ghost content — ignore everything except the custom theme
+# =============================================================================
+content/apps/
+content/data/
+content/files/
+content/images/
+content/logs/
+content/media/
+content/public/
+content/settings/
+content/themes/casper/
+content/themes/source/
+
+# Ignore the accidentally nested duplicate copy inside the theme
+content/themes/kalp-dev/kalp-dev/
+
+# Keep the custom theme
+!content/themes/kalp-dev/
+
+# =============================================================================
+# One-off SQL migration scripts (already applied)
+# =============================================================================
+*.sql
+
+# =============================================================================
+# OS / editor noise
+# =============================================================================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

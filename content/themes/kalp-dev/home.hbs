@@ -1,0 +1,74 @@
+{{!< default}}
+
+{{! Hero section }}
+<section class="hero">
+    <div class="container">
+        <h1 class="hero__title">Kalp Shah</h1>
+        <p class="hero__subtitle">building things &amp; writing words</p>
+    </div>
+</section>
+
+{{! About blurb }}
+<section class="landing-about">
+    <div class="content-container">
+        <p>Software engineer at Energy Toolbase, working in the renewables industry out of Calgary. I write code during the day and words at night—this site is my corner of the internet for both.</p>
+    </div>
+</section>
+
+{{! Recent posts preview }}
+{{#get "posts" filter="tag:blog" limit="3" include="tags" as |posts|}}
+{{#if posts}}
+<section class="post-feed">
+    <div class="container">
+        <h2 class="section-header"><span class="prompt">&gt;</span> Recent Writing</h2>
+
+        <div class="post-grid">
+            {{#foreach posts}}
+            <article class="post-card">
+                {{#if primary_tag}}
+                    {{#match primary_tag.slug "poetry"}}
+                        <span class="post-card__tag post-card__tag--poetry">Poetry</span>
+                    {{else match primary_tag.slug "blog"}}
+                        <span class="post-card__tag post-card__tag--blog">Blog</span>
+                    {{else}}
+                        <span class="post-card__tag post-card__tag--default">{{primary_tag.name}}</span>
+                    {{/match}}
+                {{/if}}
+                <h3 class="post-card__title">
+                    <a href="{{url}}">{{title}}</a>
+                </h3>
+                {{#if custom_excerpt}}
+                    <p class="post-card__excerpt">{{custom_excerpt}}</p>
+                {{else}}
+                    <p class="post-card__excerpt">{{excerpt words="25"}}</p>
+                {{/if}}
+                <time class="post-card__meta" datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM D, YYYY"}}</time>
+            </article>
+            {{/foreach}}
+        </div>
+
+        <div class="landing-cta">
+            <a href="/blog/" class="landing-cta__link">&rarr; Read all posts</a>
+        </div>
+    </div>
+</section>
+{{/if}}
+{{/get}}
+
+{{! Poetry Corner }}
+{{#get "posts" filter="tag:poetry+featured:true" limit="1" as |poetry|}}
+    {{#if poetry}}
+    <section class="poetry-corner">
+        <div class="container">
+            <h2 class="section-header"><span class="prompt">&gt;</span> Poetry Corner</h2>
+
+            {{#foreach poetry}}
+            <div class="poetry-block">
+                <p class="poetry-block__text">{{excerpt words="40"}}</p>
+                <p class="poetry-block__attribution">— from <a href="{{url}}">{{title}}</a></p>
+            </div>
+            {{/foreach}}
+        </div>
+    </section>
+    {{/if}}
+{{/get}}

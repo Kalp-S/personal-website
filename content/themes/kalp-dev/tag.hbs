@@ -1,0 +1,51 @@
+{{!< default}}
+
+<section class="archive-header">
+    <div class="container">
+        <h1 class="archive-header__title">{{tag.name}}</h1>
+        {{#if tag.description}}
+            <p class="archive-header__description">{{tag.description}}</p>
+        {{/if}}
+    </div>
+</section>
+
+<section class="post-feed">
+    <div class="container">
+        <div class="post-grid">
+            {{#foreach posts}}
+            <article class="post-card">
+                {{#if primary_tag}}
+                    {{#match primary_tag.slug "poetry"}}
+                        <span class="post-card__tag post-card__tag--poetry">Poetry</span>
+                    {{else match primary_tag.slug "blog"}}
+                        <span class="post-card__tag post-card__tag--blog">Blog</span>
+                    {{else}}
+                        <span class="post-card__tag post-card__tag--default">{{primary_tag.name}}</span>
+                    {{/match}}
+                {{/if}}
+                <h3 class="post-card__title">
+                    <a href="{{url}}">{{title}}</a>
+                </h3>
+                {{#if custom_excerpt}}
+                    <p class="post-card__excerpt">{{custom_excerpt}}</p>
+                {{else}}
+                    <p class="post-card__excerpt">{{excerpt words="25"}}</p>
+                {{/if}}
+                <time class="post-card__meta" datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM D, YYYY"}}</time>
+            </article>
+            {{/foreach}}
+        </div>
+    </div>
+</section>
+
+{{#if pagination.pages}}
+<nav class="pagination">
+    {{#if pagination.prev}}
+        <a href="{{pagination.prev}}">&larr; Newer</a>
+    {{/if}}
+    <span class="page-number">Page {{pagination.page}} of {{pagination.pages}}</span>
+    {{#if pagination.next}}
+        <a href="{{pagination.next}}">Older &rarr;</a>
+    {{/if}}
+</nav>
+{{/if}}

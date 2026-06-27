@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="{{@site.locale}}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{meta_title}}</title>
+
+    <link rel="icon" type="image/svg+xml" href="{{asset "images/spark.svg"}}">
+    <link rel="stylesheet" href="{{asset "css/style.css"}}">
+
+    {{ghost_head}}
+</head>
+<body class="{{body_class}}">
+
+    {{> header}}
+
+    <main class="site-wrapper">
+        {{{body}}}
+    </main>
+
+    {{> footer}}
+
+    <script src="{{asset "js/main.js"}}"></script>
+
+    {{ghost_foot}}
+</body>
+</html>
