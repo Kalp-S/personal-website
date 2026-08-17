@@ -318,10 +318,6 @@ img {
   color: #fff;
 }
 
-.post-card__tag--poetry {
-  background: var(--accent-navy);
-  color: #fff;
-}
 
 .post-card__tag--default {
   background: var(--text-muted);
@@ -403,38 +399,6 @@ img {
   color: var(--text-muted);
 }
 
-/* ============================================
-   Poetry Corner (Homepage)
-   ============================================ */
-.poetry-corner {
-  padding: var(--space-2xl) 0 var(--space-3xl);
-}
-
-.poetry-block {
-  max-width: 550px;
-  margin: 0 auto;
-  text-align: center;
-  padding: var(--space-2xl);
-  background: var(--bg-card);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-soft);
-}
-
-.poetry-block__text {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 1.15rem;
-  line-height: 2;
-  color: var(--text-primary);
-}
-
-.poetry-block__attribution {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: var(--space-lg);
-}
 
 /* ============================================
    Single Post / Page
@@ -787,13 +751,28 @@ img {
    Responsive
    ============================================ */
 @media (max-width: 768px) {
+  .site-nav .container {
+    flex-wrap: wrap;
+  }
+
+  .site-nav__menu {
+    width: 100%;
+    order: 3;
+  }
+
   .site-nav__links {
     display: none;
     width: 100%;
     flex-direction: column;
     padding: var(--space-md) 0 var(--space-xl);
-    gap: var(--space-xl);
+    gap: var(--space-lg);
     text-align: center;
+  }
+
+  .site-nav__links a {
+    font-size: 1.05rem;
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
   }
 
   .site-nav__links.open {

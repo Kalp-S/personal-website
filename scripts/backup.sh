@@ -38,16 +38,25 @@ trap cleanup EXIT
 
 log "Starting Ghost blog backup: ${ARCHIVE_NAME}"
 
-# 1. Dump MySQL database from inside the container
+# 1. Dump MySQL databases from inside the container
 log "Dumping MySQL database (${DB_NAME})..."
 docker exec "${DB_CONTAINER}" \
     mysqldump -u "${DB_USER}" -p"${DB_PASSWORD}" --no-tablespaces "${DB_NAME}" \
     > "${TMP_DIR}/ghost_db.sql"
-log "Database dump complete ($(du -sh "${TMP_DIR}/ghost_db.sql" | cut -f1))"
+log "ghost_db dump complete ($(du -sh "${TMP_DIR}/ghost_db.sql" | cut -f1))"
 
-# 2. Copy content folder (images, media, themes, settings) and config files
-log "Copying Ghost content directory..."
+log "Dumping MySQL database (ghost_poetry_db)..."
+docker exec "${DB_CONTAINER}" \
+    mysqldump -u "${DB_USER}" -p"${DB_PASSWORD}" --no-tablespaces ghost_poetry_db \
+    > "${TMP_DIR}/ghost_poetry_db.sql"
+log "ghost_poetry_db dump complete ($(du -sh "${TMP_DIR}/ghost_poetry_db.sql" | cut -f1))"
+
+# 2. Copy content folders (images, media, themes, settings) and config files
+log "Copying Ghost content directories..."
 cp -r "${BLOG_DIR}/content" "${TMP_DIR}/"
+if [[ -d "${BLOG_DIR}/poetry-content" ]]; then
+    cp -r "${BLOG_DIR}/poetry-content" "${TMP_DIR}/"
+fi
 
 log "Copying configuration files..."
 cp "${BLOG_DIR}/docker-compose.yml" "${TMP_DIR}/"

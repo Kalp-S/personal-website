@@ -17,7 +17,7 @@ backups/
 db/
 
 # =============================================================================
-# Ghost content — ignore everything except the custom theme
+# Ghost content — ignore everything except the custom themes
 # =============================================================================
 content/apps/
 content/data/
@@ -27,14 +27,30 @@ content/logs/
 content/media/
 content/public/
 content/settings/
+content/themes/casper
 content/themes/casper/
+content/themes/source
 content/themes/source/
-
-# Ignore the accidentally nested duplicate copy inside the theme
-content/themes/kalp-dev/kalp-dev/
 
 # Keep the custom theme
 !content/themes/kalp-dev/
+
+poetry-content/apps/
+poetry-content/data/
+poetry-content/files/
+poetry-content/images/
+poetry-content/logs/
+poetry-content/media/
+poetry-content/public/
+poetry-content/settings/
+poetry-content/themes/casper
+poetry-content/themes/casper/
+poetry-content/themes/source
+poetry-content/themes/source/
+
+# Keep the poetry theme
+!poetry-content/themes/poetry-theme/
+
 
 # =============================================================================
 # One-off SQL migration scripts (already applied)

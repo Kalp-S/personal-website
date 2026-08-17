@@ -112,29 +112,43 @@ log "Contents extracted."
 [[ -f "${TMP_DIR}/ghost_db.sql" ]] || die "Archive does not contain ghost_db.sql — invalid backup."
 
 # =============================================================================
-# Step 4 — Stop Ghost app (keep DB running for restore)
+# Step 4 — Stop Ghost apps (keep DB running for restore)
 # =============================================================================
-log "Stopping Ghost container (keeping MySQL running)..."
+log "Stopping Ghost containers (keeping MySQL running)..."
 cd "${BLOG_DIR}"
-docker compose stop ghost
+docker compose stop ghost ghost-poetry 2>/dev/null || docker compose stop ghost
 log "Ghost stopped."
 
 # =============================================================================
-# Step 5 — Restore MySQL database
+# Step 5 — Restore MySQL databases
 # =============================================================================
 log "Restoring MySQL database '${DB_NAME}' from dump..."
 docker exec -i "${DB_CONTAINER}" \
     mysql -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" \
     < "${TMP_DIR}/ghost_db.sql"
-log "✅ MySQL database restored."
+log "✅ MySQL database '${DB_NAME}' restored."
+
+if [[ -f "${TMP_DIR}/ghost_poetry_db.sql" ]]; then
+    log "Restoring MySQL database 'ghost_poetry_db' from dump..."
+    docker exec -i "${DB_CONTAINER}" \
+        mysql -u "${DB_USER}" -p"${DB_PASSWORD}" ghost_poetry_db \
+        < "${TMP_DIR}/ghost_poetry_db.sql"
+    log "✅ MySQL database 'ghost_poetry_db' restored."
+fi
 
 # =============================================================================
-# Step 6 — Restore Content Directory
+# Step 6 — Restore Content Directories
 # =============================================================================
 if [[ -d "${TMP_DIR}/content" ]]; then
     log "Restoring content directory (themes, media, settings)..."
     cp -r "${TMP_DIR}/content" "${BLOG_DIR}/"
     log "✅ Content directory restored."
+fi
+
+if [[ -d "${TMP_DIR}/poetry-content" ]]; then
+    log "Restoring poetry content directory..."
+    cp -r "${TMP_DIR}/poetry-content" "${BLOG_DIR}/"
+    log "✅ Poetry content directory restored."
 fi
 
 # =============================================================================
@@ -165,10 +179,11 @@ fi
 # =============================================================================
 # Step 8 — Restart Ghost
 # =============================================================================
-log "Starting Ghost container..."
-docker compose start ghost
+log "Starting Ghost containers..."
+docker compose start ghost ghost-poetry 2>/dev/null || docker compose start ghost
 log "✅ Ghost started."
 
 echo ""
-log "🎉 Restore complete! Ghost blog is back up at https://kalp.dev"
+log "🎉 Restore complete! Ghost blogs are back up at https://kalp.dev and https://poetry.kalp.dev"
 log "   Restored from: $(basename "${ARCHIVE_PATH}")"
+

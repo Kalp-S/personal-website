@@ -9,6 +9,27 @@ services:
     volumes:
       - ./content:/var/lib/ghost/content
       - ./content/themes/kalp-dev:/var/lib/ghost/content/themes/kalp-dev
+    depends_on:
+      - db
+
+  ghost-poetry:
+    image: ghost:5-alpine
+    restart: always
+    ports:
+      - "2369:2368"
+    environment:
+      - database__client=mysql
+      - database__connection__host=db
+      - database__connection__user=ghost
+      - database__connection__password=ghostpassword
+      - database__connection__database=ghost_poetry_db
+      - url=https://poetry.kalp.dev
+      - NODE_ENV=production
+    volumes:
+      - ./poetry-content:/var/lib/ghost/content
+      - ./poetry-content/themes/poetry-theme:/var/lib/ghost/content/themes/poetry-theme
+    depends_on:
+      - db
 
   db:
     image: mysql:8.0
@@ -17,3 +38,4 @@ services:
       - .env
     volumes:
       - ./db:/var/lib/mysql
+

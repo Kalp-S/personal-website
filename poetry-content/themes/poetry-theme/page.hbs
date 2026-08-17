@@ -1,0 +1,23 @@
+{{!< default}}
+
+{{#post}}
+<article class="post-full">
+    <div class="content-container">
+
+        <header class="post-full__header">
+            <h1 class="post-full__title">{{title}}</h1>
+        </header>
+
+        {{#if feature_image}}
+        <figure class="post-full__image">
+            <img src="{{feature_image}}" alt="{{#if feature_image_alt}}{{feature_image_alt}}{{else}}{{title}}{{/if}}">
+        </figure>
+        {{/if}}
+
+        <section class="post-content">
+            {{content}}
+        </section>
+
+    </div>
+</article>
+{{/post}}

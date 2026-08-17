@@ -4,7 +4,7 @@
 <section class="hero">
     <div class="container">
         <h1 class="hero__title">Kalp Shah</h1>
-        <p class="hero__subtitle">building things &amp; writing words</p>
+        <p class="hero__subtitle">Software Engineer &amp; Builder</p>
     </div>
 </section>
 
@@ -17,9 +17,7 @@
             {{#foreach posts}}
             <article class="post-card">
                 {{#if primary_tag}}
-                    {{#match primary_tag.slug "poetry"}}
-                        <span class="post-card__tag post-card__tag--poetry">Poetry</span>
-                    {{else match primary_tag.slug "blog"}}
+                    {{#match primary_tag.slug "blog"}}
                         <span class="post-card__tag post-card__tag--blog">Blog</span>
                     {{else}}
                         <span class="post-card__tag post-card__tag--default">{{primary_tag.name}}</span>
@@ -39,24 +37,6 @@
         </div>
     </div>
 </section>
-
-{{! Poetry Corner - shows a pinned/featured poetry post excerpt }}
-{{#get "posts" filter="tag:poetry+featured:true" limit="1" as |poetry|}}
-    {{#if poetry}}
-    <section class="poetry-corner">
-        <div class="container">
-            <h2 class="section-header"><span class="prompt">&gt;</span> Poetry Corner</h2>
-
-            {{#foreach poetry}}
-            <div class="poetry-block">
-                <p class="poetry-block__text">{{excerpt words="40"}}</p>
-                <p class="poetry-block__attribution">— from <a href="{{url}}">{{title}}</a></p>
-            </div>
-            {{/foreach}}
-        </div>
-    </section>
-    {{/if}}
-{{/get}}
 
 {{! Pagination }}
 {{#if pagination.pages}}
