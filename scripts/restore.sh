@@ -124,14 +124,14 @@ log "Ghost stopped."
 # =============================================================================
 log "Restoring MySQL database '${DB_NAME}' from dump..."
 docker exec -i "${DB_CONTAINER}" \
-    mysql -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" \
+    mysql -u "${DB_USER}" -p"${DB_PASSWORD}" --default-character-set=utf8mb4 "${DB_NAME}" \
     < "${TMP_DIR}/ghost_db.sql"
 log "✅ MySQL database '${DB_NAME}' restored."
 
 if [[ -f "${TMP_DIR}/ghost_poetry_db.sql" ]]; then
     log "Restoring MySQL database 'ghost_poetry_db' from dump..."
     docker exec -i "${DB_CONTAINER}" \
-        mysql -u "${DB_USER}" -p"${DB_PASSWORD}" ghost_poetry_db \
+        mysql -u "${DB_USER}" -p"${DB_PASSWORD}" --default-character-set=utf8mb4 ghost_poetry_db \
         < "${TMP_DIR}/ghost_poetry_db.sql"
     log "✅ MySQL database 'ghost_poetry_db' restored."
 fi

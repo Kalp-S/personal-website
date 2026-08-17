@@ -41,13 +41,13 @@ log "Starting Ghost blog backup: ${ARCHIVE_NAME}"
 # 1. Dump MySQL databases from inside the container
 log "Dumping MySQL database (${DB_NAME})..."
 docker exec "${DB_CONTAINER}" \
-    mysqldump -u "${DB_USER}" -p"${DB_PASSWORD}" --no-tablespaces "${DB_NAME}" \
+    mysqldump -u "${DB_USER}" -p"${DB_PASSWORD}" --default-character-set=utf8mb4 --no-tablespaces "${DB_NAME}" \
     > "${TMP_DIR}/ghost_db.sql"
 log "ghost_db dump complete ($(du -sh "${TMP_DIR}/ghost_db.sql" | cut -f1))"
 
 log "Dumping MySQL database (ghost_poetry_db)..."
 docker exec "${DB_CONTAINER}" \
-    mysqldump -u "${DB_USER}" -p"${DB_PASSWORD}" --no-tablespaces ghost_poetry_db \
+    mysqldump -u "${DB_USER}" -p"${DB_PASSWORD}" --default-character-set=utf8mb4 --no-tablespaces ghost_poetry_db \
     > "${TMP_DIR}/ghost_poetry_db.sql"
 log "ghost_poetry_db dump complete ($(du -sh "${TMP_DIR}/ghost_poetry_db.sql" | cut -f1))"
 
