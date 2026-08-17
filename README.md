@@ -69,25 +69,38 @@ After making changes, either:
 - Restart Ghost: `docker compose restart ghost`
 - Or upload via the Ghost admin panel: **Settings → Design → Upload theme**
 
-## Cloudflare Tunnel Config
+## Backup & Restore
 
-Managed in `/etc/cloudflared/config.yml` on the host machine:
+Backups include a full MySQL dump + Ghost content directory (`content/`) + config files, stored in Google Drive (`gdrive:blog backups`). A systemd timer runs `scripts/backup.sh` daily at **2:30 AM**.
 
-```yaml
-tunnel: <tunnel-id>
-credentials-file: /home/kalp/.cloudflared/<tunnel-id>.json
-
-ingress:
-  - hostname: kalp.dev
-    service: http://localhost:2368   # Ghost blog
-  - hostname: joplin.kalp.dev
-    service: http://localhost:22300  # Joplin Server
-  - service: http_status:404
-```
+### Run a manual backup
 
 ```bash
-# Restart tunnel after config changes
-sudo systemctl restart cloudflared
+./scripts/backup.sh
+```
+
+### Restore from a backup
+
+```bash
+./scripts/restore.sh               # interactive — lists Drive backups, you pick one
+./scripts/restore.sh ./backups/blog-backup-2026-08-17_03-27-08.tar.gz  # direct file
+```
+
+> **Note:** Restore will prompt you to type `YES` before replacing MySQL database and content files.
+
+### Check backup timer status
+
+```bash
+systemctl list-timers blog-backup.timer
+journalctl -u blog-backup.service -n 50
+```
+
+## Running Tests
+
+An automated integration test suite is provided in `tests/test_blog_service.py`:
+
+```bash
+./scripts/test_blog.sh
 ```
 
 ## Useful Commands
@@ -113,6 +126,13 @@ docker compose pull && docker compose up -d
 ├── docker-compose.yml            # Ghost + MySQL service definitions
 ├── .env                          # Secrets & config (gitignored)
 ├── .env.example                  # Safe config template
+├── scripts/
+│   ├── backup.sh                 # Daily backup script
+│   ├── restore.sh                # Interactive restore script
+│   └── test_blog.sh              # Integration test runner
+├── tests/
+│   └── test_blog_service.py      # Python integration test suite
+├── backups/                      # Local backup archives (gitignored)
 └── content/
     └── themes/
         └── kalp-dev/             # Custom Ghost theme (tracked)
@@ -127,3 +147,4 @@ docker compose pull && docker compose up -d
             ├── assets/
             └── partials/
 ```
+

@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""
+Ghost Blog & MySQL Integration Test Suite
+=========================================
+Validates:
+1. Docker container status & MySQL database health
+2. Ghost HTTP routing, theme asset rendering, and admin endpoint
+3. Backup pipeline integrity (MySQL dump, content folder, config files)
+4. Google Drive rclone integration
+5. Systemd timer & service configurations
+"""
+
+import json
+import os
+import subprocess
+import unittest
+import urllib.error
+import urllib.request
+
+BASE_URL = os.environ.get("BLOG_BASE_URL", "http://127.0.0.1:2368")
+HOST_HEADER = os.environ.get("BLOG_HOST_HEADER", "kalp.dev")
+DB_CONTAINER = os.environ.get("DB_CONTAINER", "blog-db-1")
+SERVER_CONTAINER = os.environ.get("SERVER_CONTAINER", "blog-ghost-1")
+
+
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Prevents automatic redirection so tests can inspect 301/302 responses."""
+    def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+        return None
+
+
+def make_request(path, method="GET", headers=None, with_forwarded_proto=True, follow_redirects=True):
+    url = f"{BASE_URL}{path}"
+    req_headers = {
+        "User-Agent": "GhostBlogIntegrationTest/1.0",
+        "Host": HOST_HEADER,
+    }
+    if with_forwarded_proto:
+        req_headers["X-Forwarded-Proto"] = "https"
+    if headers:
+        req_headers.update(headers)
+
+    req = urllib.request.Request(url, headers=req_headers, method=method)
+    handlers = [] if follow_redirects else [NoRedirectHandler()]
+    opener = urllib.request.build_opener(*handlers)
+    try:
+        with opener.open(req, timeout=10) as response:
+            return response.status, dict(response.headers), response.read()
+    except urllib.error.HTTPError as e:
+        return e.code, dict(e.headers), e.read()
+    except urllib.error.URLError as e:
+        return 0, {}, str(e).encode("utf-8")
+
+
+class TestDockerAndDatabaseHealth(unittest.TestCase):
+    """Verifies Docker containers and MySQL database connectivity."""
+
+    def test_docker_containers_running(self):
+        """Ensure both Ghost server and MySQL database containers are Up."""
+        res = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}\t{{.Status}}"],
+            capture_output=True, text=True, check=True
+        )
+        lines = res.stdout.strip().split("\n")
+        containers = {line.split("\t")[0]: line.split("\t")[1] for line in lines if "\t" in line}
+
+        self.assertIn(SERVER_CONTAINER, containers, f"{SERVER_CONTAINER} is not running")
+        self.assertIn(DB_CONTAINER, containers, f"{DB_CONTAINER} is not running")
+        self.assertTrue(containers[SERVER_CONTAINER].startswith("Up"), f"{SERVER_CONTAINER} is down")
+        self.assertTrue(containers[DB_CONTAINER].startswith("Up"), f"{DB_CONTAINER} is down")
+
+    def test_mysql_table_integrity(self):
+        """Ensure critical Ghost MySQL database tables exist and contain records."""
+        cmd = [
+            "docker", "exec", DB_CONTAINER,
+            "mysql", "-u", "ghost", "-pghostpassword", "-D", "ghost_db",
+            "-N", "-e", "SELECT count(*) FROM posts; SELECT count(*) FROM users; SELECT count(*) FROM settings;"
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        counts = [line.strip() for line in res.stdout.strip().split("\n") if line.strip().isdigit()]
+        self.assertEqual(len(counts), 3, "Failed to query posts, users, and settings from MySQL")
+        post_count = int(counts[0])
+        user_count = int(counts[1])
+        settings_count = int(counts[2])
+
+        self.assertGreater(user_count, 0, "No users found in Ghost database")
+        self.assertGreater(post_count, 0, "No posts found in Ghost database")
+        self.assertGreater(settings_count, 0, "No settings configured in Ghost database")
+
+
+class TestGhostWebRoutingAndTheme(unittest.TestCase):
+    """Tests Ghost frontend rendering, HTTPS redirection, and theme assets."""
+
+    def test_homepage_https_rendering(self):
+        """Homepage with forwarded HTTPS header should return 200 OK with custom theme HTML."""
+        status, headers, body = make_request("/", method="GET", with_forwarded_proto=True)
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        self.assertIn("<!DOCTYPE html>", html)
+        self.assertIn("Kalp Shah", html)
+        self.assertIn("/assets/css/style.css", html)
+
+    def test_http_to_https_redirect(self):
+        """Request without forwarded HTTPS header should return 301 redirect to canonical HTTPS."""
+        status, headers, body = make_request("/", method="GET", with_forwarded_proto=False, follow_redirects=False)
+        self.assertIn(status, (301, 302))
+        location = headers.get("Location", headers.get("location", ""))
+        self.assertTrue(location.startswith("https://kalp.dev"), f"Invalid redirect location: {location}")
+
+    def test_theme_static_asset_serving(self):
+        """Ghost should serve static theme assets (CSS/SVG) with 200 OK."""
+        status, headers, body = make_request("/assets/css/style.css", method="GET", with_forwarded_proto=True)
+        self.assertEqual(status, 200)
+        self.assertGreater(len(body), 100, "Theme CSS asset is empty")
+
+    def test_ghost_admin_endpoint(self):
+        """Ghost admin endpoint /ghost/ should return 200 OK or redirect to sign-in."""
+        status, headers, body = make_request("/ghost/", method="GET", with_forwarded_proto=True)
+        self.assertIn(status, (200, 302))
+
+
+class TestBackupAndStoragePipeline(unittest.TestCase):
+    """Validates the blog backup & restore scripts, archive contents, and Google Drive upload."""
+
+    def test_scripts_exist_and_executable(self):
+        """Ensure backup.sh and restore.sh are present and executable."""
+        for script in ["backup.sh", "restore.sh"]:
+            path = f"/home/kalp/git/blog/scripts/{script}"
+            self.assertTrue(os.path.isfile(path), f"{script} not found")
+            self.assertTrue(os.access(path, os.X_OK), f"{script} is not executable")
+
+    def test_local_backup_archive_integrity(self):
+        """Ensure local backup archive exists and contains ghost_db.sql, content, and configs."""
+        backup_dir = "/home/kalp/git/blog/backups"
+        self.assertTrue(os.path.isdir(backup_dir), "backups directory missing")
+        archives = [
+            os.path.join(backup_dir, f)
+            for f in os.listdir(backup_dir)
+            if f.endswith(".tar.gz")
+        ]
+        self.assertGreater(len(archives), 0, "No local blog backup archives found")
+
+        latest_archive = max(archives, key=os.path.getmtime)
+        res = subprocess.run(["tar", "-tzf", latest_archive], capture_output=True, text=True, check=True)
+        files = res.stdout.strip().split("\n")
+
+        self.assertTrue(any("ghost_db.sql" in f for f in files), "ghost_db.sql missing from archive")
+        self.assertTrue(any("content/" in f for f in files), "content/ directory missing from archive")
+        self.assertTrue(any("docker-compose.yml" in f for f in files), "docker-compose.yml missing from archive")
+
+    def test_rclone_gdrive_connectivity(self):
+        """Ensure rclone can connect to Google Drive and list blog backups folder."""
+        res = subprocess.run(
+            ["rclone", "ls", "gdrive:blog backups"],
+            capture_output=True, text=True, check=True
+        )
+        self.assertIn(".tar.gz", res.stdout, "No archives found in remote Google Drive blog backups")
+
+
+class TestSystemdTimerIntegration(unittest.TestCase):
+    """Validates that systemd units for blog backup are configured and active."""
+
+    def test_backup_timer_active(self):
+        """Ensure blog-backup.timer is active and scheduled in systemd."""
+        res = subprocess.run(
+            ["systemctl", "is-active", "blog-backup.timer"],
+            capture_output=True, text=True
+        )
+        self.assertEqual(res.stdout.strip(), "active", "blog-backup.timer is not active")
+
+    def test_backup_service_definition(self):
+        """Ensure blog-backup.service points to the correct executable path."""
+        res = subprocess.run(
+            ["systemctl", "cat", "blog-backup.service"],
+            capture_output=True, text=True, check=True
+        )
+        self.assertIn("ExecStart=/home/kalp/git/blog/scripts/backup.sh", res.stdout)
+
+
+if __name__ == "__main__":
+    import warnings
+    warnings.simplefilter("ignore", ResourceWarning)
+    unittest.main(verbosity=2)
