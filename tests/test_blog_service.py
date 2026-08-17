@@ -323,6 +323,30 @@ class TestMobileNavigation(unittest.TestCase):
         self.assertIn('assets/js/main.js', html)
 
 
+class TestTextEncodingAndMojibake(unittest.TestCase):
+    """Verifies that pages and database entries do not contain corrupted Mojibake characters."""
+
+    def test_resume_page_character_encoding(self):
+        """Resume page should render clean bullets and dashes without mojibake."""
+        status, headers, body = make_request(
+            "/resume/",
+            base_url=BASE_URL,
+            host_header=HOST_HEADER,
+            method="GET",
+            with_forwarded_proto=True
+        )
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        # Assert absence of mojibake patterns
+        for bad in ["â€¢", "â€”", "â€“", "Â·", "â†—"]:
+            self.assertNotIn(bad, html, f"Found mojibake {bad} in resume page HTML")
+        # Assert presence of expected clean characters
+        self.assertIn("Java, Python, C#, JavaScript, React • AWS", html)
+        self.assertIn("Software Engineer — Energy Toolbase", html)
+        self.assertIn("Mar 2022 – Present", html)
+        self.assertIn("GitHub</a> · <a", html)
+
+
 if __name__ == "__main__":
     import warnings
     warnings.simplefilter("ignore", ResourceWarning)
