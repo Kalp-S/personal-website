@@ -346,6 +346,21 @@ class TestTextEncodingAndMojibake(unittest.TestCase):
         self.assertIn("Mar 2022 – Present", html)
         self.assertIn("GitHub</a> · <a", html)
 
+    def test_about_page_character_encoding(self):
+        """About page should render clean emoji without mojibake."""
+        status, headers, body = make_request(
+            "/about/",
+            base_url=BASE_URL,
+            host_header=HOST_HEADER,
+            method="GET",
+            with_forwarded_proto=True
+        )
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        for bad in ["ðŸ‘‹", "ðŸ", "â€", "Â"]:
+            self.assertNotIn(bad, html, f"Found mojibake {bad} in about page HTML")
+        self.assertIn("Hey, I am Kalp. 👋", html)
+
 
 if __name__ == "__main__":
     import warnings
