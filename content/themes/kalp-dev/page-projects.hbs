@@ -6,11 +6,34 @@
 
         <header class="post-full__header projects-header">
             <h1 class="post-full__title">{{title}}</h1>
-            <p class="projects-subtitle">Selected systems architecture, self-hosted infrastructure, and developer tooling.</p>
+            <p class="projects-subtitle">Selected systems architecture, distributed IoT platforms, self-hosted infrastructure, and developer tooling.</p>
         </header>
 
         <div class="projects-grid">
 
+            <!-- 1. FireSafetyCapstone -->
+            <div class="project-card">
+                <div class="project-card__tags">
+                    <span class="project-tag">IoT &amp; LoRaWAN</span>
+                    <span class="project-tag">Reinforcement Learning</span>
+                    <span class="project-tag">Node-RED</span>
+                    <span class="project-tag">Python</span>
+                    <span class="project-tag">Android</span>
+                    <span class="project-tag">Embedded C++</span>
+                </div>
+                <h2 class="project-card__title">Distributed IoT &amp; Real-Time AI Evacuation Platform</h2>
+                <p class="project-card__desc">
+                    Multi-tier edge-to-cloud fire safety telemetry and emergency evacuation platform. Features custom microcontroller sensor nodes transmitting environmental data over LoRaWAN RF, gateway decoding, MQTT routing via Node-RED, and a reinforcement learning (Q-learning) pathfinding algorithm that dynamically recalculates hazard-free evacuation routes for a native Android mobile client.
+                </p>
+                <div class="project-card__links">
+                    <a href="https://github.com/Kalp-S/FireSafetyCapstone" class="project-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                        <span>Source Code</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. Personal Cloud Platform -->
             <div class="project-card">
                 <div class="project-card__tags">
                     <span class="project-tag">Docker Compose</span>
@@ -18,10 +41,11 @@
                     <span class="project-tag">Ghost</span>
                     <span class="project-tag">MySQL</span>
                     <span class="project-tag">Python</span>
+                    <span class="project-tag">Disaster Recovery</span>
                 </div>
-                <h2 class="project-card__title">Personal Cloud Platform &amp; Infrastructure</h2>
+                <h2 class="project-card__title">Personal Cloud Platform &amp; Automated Disaster Recovery</h2>
                 <p class="project-card__desc">
-                    Self-hosted production infrastructure running on local hardware exposed via Cloudflare zero-trust tunnels. Features automated multi-database backup pipelines to offsite storage, automated restore scripts, and end-to-end Python integration testing.
+                    Self-hosted multi-service production infrastructure running on bare metal exposed through Cloudflare zero-trust tunnels (kalp.dev). Built with automated multi-database backup pipelines to offsite encrypted cloud storage, automated disaster recovery scripts, and a continuous 24-test Python integration verification suite.
                 </p>
                 <div class="project-card__links">
                     <a href="https://github.com/Kalp-S/personal-website" class="project-link" target="_blank" rel="noopener noreferrer">
@@ -35,16 +59,86 @@
                 </div>
             </div>
 
+            <!-- 3. OnlineCafeSystem -->
+            <div class="project-card">
+                <div class="project-card__tags">
+                    <span class="project-tag">React</span>
+                    <span class="project-tag">Node.js</span>
+                    <span class="project-tag">Express</span>
+                    <span class="project-tag">AWS DynamoDB</span>
+                    <span class="project-tag">RBAC</span>
+                    <span class="project-tag">REST APIs</span>
+                </div>
+                <h2 class="project-card__title">Multi-Tenant Corporate Cafeteria &amp; Catering Platform</h2>
+                <p class="project-card__desc">
+                    Full-stack corporate catering and meal scheduling platform built for enterprise multi-tenancy. Features fine-grained Role-Based Access Control (Admin, Company Manager, Food Vendor, Employee), a strict 12-hour ordering lockouts business rules engine, and NoSQL data modeling on AWS DynamoDB.
+                </p>
+                <div class="project-card__links">
+                    <a href="https://github.com/Kalp-S/OnlineCafeSystem" class="project-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                        <span>Source Code</span>
+                    </a>
+                    <a href="https://drive.google.com/file/d/1aB6g_3Au31SJBCjUM7RhuS4FLITSGOQ3/view?usp=sharing" class="project-link project-link--demo" target="_blank" rel="noopener noreferrer">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <span>Demo Video</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 4. javaSecureFileTransfer -->
+            <div class="project-card">
+                <div class="project-card__tags">
+                    <span class="project-tag">Java</span>
+                    <span class="project-tag">Network Security</span>
+                    <span class="project-tag">DES &amp; RSA</span>
+                    <span class="project-tag">TCP Sockets</span>
+                    <span class="project-tag">Needham-Schroeder</span>
+                </div>
+                <h2 class="project-card__title">Authenticated Cryptographic Protocol &amp; Socket Suite</h2>
+                <p class="project-card__desc">
+                    End-to-end cryptographic client-server protocol implemented in Java over raw TCP sockets. Implements mutual challenge-response authentication with replay-resistant nonces, hybrid RSA asymmetric handshaking, symmetric DES session cipher negotiation, and packetized encrypted binary file streaming.
+                </p>
+                <div class="project-card__links">
+                    <a href="https://github.com/Kalp-S/javaSecureFileTransfer" class="project-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                        <span>Source Code</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 5. TimescaleDB on Kubernetes -->
+            <div class="project-card">
+                <div class="project-card__tags">
+                    <span class="project-tag">Kubernetes</span>
+                    <span class="project-tag">TimescaleDB</span>
+                    <span class="project-tag">Helm</span>
+                    <span class="project-tag">PostgreSQL</span>
+                    <span class="project-tag">Cloud Architecture</span>
+                </div>
+                <h2 class="project-card__title">High-Throughput Time-Series Database Orchestration</h2>
+                <p class="project-card__desc">
+                    Cloud-native deployment architectures and Helm charts for running high-throughput TimescaleDB time-series database clusters on Kubernetes (AWS EKS / MicroK8s), optimized for high-volume IoT metrics and power electronics telemetry storage.
+                </p>
+                <div class="project-card__links">
+                    <a href="https://github.com/Kalp-S/timescaledb-kubernetes" class="project-link" target="_blank" rel="noopener noreferrer">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                        <span>Source Code</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 6. mississaugaBooking -->
             <div class="project-card">
                 <div class="project-card__tags">
                     <span class="project-tag">Python</span>
                     <span class="project-tag">Selenium WebDriver</span>
+                    <span class="project-tag">Linux Daemon</span>
                     <span class="project-tag">Raspberry Pi</span>
-                    <span class="project-tag">Linux</span>
+                    <span class="project-tag">systemd</span>
                 </div>
-                <h2 class="project-card__title">Facility Reservation Automation Engine</h2>
+                <h2 class="project-card__title">Autonomous 24/7 Scheduling &amp; Reservation Daemon</h2>
                 <p class="project-card__desc">
-                    High-reliability booking daemon running 24/7 on a Raspberry Pi to execute precise, scheduled reservations for high-demand municipal athletic facilities. Features headless browser scheduling, session state persistence, and automatic retry handling.
+                    Autonomous headless booking daemon designed to execute sub-second reservations during competitive 6:01 AM municipal registration windows. Features multi-account credential pooling, automatic waitlist failover, low-overhead loop scheduling, and a native systemd service unit for 24/7 Raspberry Pi operation.
                 </p>
                 <div class="project-card__links">
                     <a href="https://github.com/Kalp-S/mississaugaBooking" class="project-link" target="_blank" rel="noopener noreferrer">
@@ -54,16 +148,17 @@
                 </div>
             </div>
 
+            <!-- 7. Joplin Sync Server -->
             <div class="project-card">
                 <div class="project-card__tags">
-                    <span class="project-tag">Docker</span>
+                    <span class="project-tag">Docker Compose</span>
                     <span class="project-tag">PostgreSQL</span>
                     <span class="project-tag">Cloudflare Tunnels</span>
                     <span class="project-tag">systemd</span>
                 </div>
-                <h2 class="project-card__title">Self-Hosted Joplin Sync Server</h2>
+                <h2 class="project-card__title">Private Cloud Knowledge Base &amp; Storage Synchronization</h2>
                 <p class="project-card__desc">
-                    Secure self-hosted synchronization server for Joplin notes, backed by PostgreSQL and containerized with Docker Compose. Integrated with automated database snapshots, Google Drive replication, and zero-trust Cloudflare ingress routing.
+                    Secure containerized synchronization server for multi-client notes and documentation, backed by PostgreSQL. Integrated with automated scheduled snapshots, offsite cloud backups, and zero-trust Cloudflare access control.
                 </p>
                 <div class="project-card__links">
                     <a href="https://github.com/Kalp-S/joplin-server" class="project-link" target="_blank" rel="noopener noreferrer">
@@ -73,19 +168,20 @@
                 </div>
             </div>
 
+            <!-- 8. tictactoe-AI -->
             <div class="project-card">
                 <div class="project-card__tags">
-                    <span class="project-tag">Kubernetes</span>
-                    <span class="project-tag">TimescaleDB</span>
-                    <span class="project-tag">Helm</span>
-                    <span class="project-tag">PostgreSQL</span>
+                    <span class="project-tag">React</span>
+                    <span class="project-tag">JavaScript ES6+</span>
+                    <span class="project-tag">Minimax Algorithm</span>
+                    <span class="project-tag">Game Theory</span>
                 </div>
-                <h2 class="project-card__title">TimescaleDB on Kubernetes</h2>
+                <h2 class="project-card__title">Zero-Sum Game Theory &amp; Minimax Decision Engine</h2>
                 <p class="project-card__desc">
-                    Configuration and deployment recipes using Helm charts to deploy TimescaleDB time-series database clusters on Kubernetes (AWS EKS, MicroK8s, Minikube) for high-scale IoT and metric data storage.
+                    Interactive browser application powered by a recursive zero-sum Minimax decision tree with depth-penalized utility scoring, rendering the AI mathematically unbeatable in React. Features state-driven board rendering, difficulty toggle, and persistent session scoring.
                 </p>
                 <div class="project-card__links">
-                    <a href="https://github.com/Kalp-S/timescaledb-kubernetes" class="project-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/Kalp-S/tictactoe-AI" class="project-link" target="_blank" rel="noopener noreferrer">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
                         <span>Source Code</span>
                     </a>
