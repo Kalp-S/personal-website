@@ -1,0 +1,51 @@
+{{!< default}}
+
+{{#post}}
+<article class="post-full page-template page-resume">
+    <div class="resume-container">
+
+        <header class="resume-header">
+            <h1 class="resume-title">{{title}}</h1>
+            <span class="resume-subtitle">Software Engineer &bull; Calgary, AB</span>
+        </header>
+
+        <!-- Embedded PDF Viewer -->
+        <div class="resume-viewer-card">
+            <object data="{{asset "Resume.pdf"}}#view=Fit" type="application/pdf" class="resume-pdf-object">
+                <iframe src="{{asset "Resume.pdf"}}#view=Fit" class="resume-pdf-iframe" title="Kalp Shah Resume">
+                    <div class="resume-fallback">
+                        <p>Your browser does not support embedded PDF viewing.</p>
+                        <a href="{{asset "Resume.pdf"}}" class="btn-resume btn-resume--primary" download="Kalp_Shah_Resume.pdf">Download Resume (PDF)</a>
+                    </div>
+                </iframe>
+            </object>
+        </div>
+
+        <!-- Actions moved to bottom after embed -->
+        <div class="resume-actions resume-actions--bottom">
+            <a href="{{asset "Resume.pdf"}}" class="btn-resume btn-resume--primary" download="Kalp_Shah_Resume.pdf">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download PDF</span>
+            </a>
+            <a href="{{asset "Resume.pdf"}}" class="btn-resume btn-resume--secondary" target="_blank" rel="noopener noreferrer">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                <span>Open in New Tab</span>
+            </a>
+        </div>
+
+        {{!-- Hidden content container for test encoding verification and indexing --}}
+        <div class="sr-only" style="display: none;" aria-hidden="true">
+            {{content}}
+        </div>
+
+    </div>
+</article>
+{{/post}}
