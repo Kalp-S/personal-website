@@ -936,6 +936,18 @@ img {
   color: #ffffff !important;
 }
 
+.project-link--demo {
+  background: var(--bg-secondary);
+  color: var(--accent-navy);
+  border-color: var(--border-light);
+}
+
+.project-link--demo:hover {
+  border-color: var(--accent-navy);
+  color: var(--accent-coral);
+  transform: translateY(-1px);
+}
+
 @media (max-width: 640px) {
   .projects-grid {
     grid-template-columns: 1fr;
