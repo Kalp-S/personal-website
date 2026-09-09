@@ -31,6 +31,25 @@ services:
     depends_on:
       - db
 
+  ghost-blog:
+    image: ghost:5-alpine
+    restart: always
+    ports:
+      - "2370:2368"
+    environment:
+      - database__client=mysql
+      - database__connection__host=db
+      - database__connection__user=ghost
+      - database__connection__password=ghostpassword
+      - database__connection__database=ghost_blog_db
+      - url=https://blog.kalp.dev
+      - NODE_ENV=production
+    volumes:
+      - ./blog-content:/var/lib/ghost/content
+      - ./blog-content/themes/blog-theme:/var/lib/ghost/content/themes/blog-theme
+    depends_on:
+      - db
+
   db:
     image: mysql:8.0
     restart: always

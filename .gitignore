@@ -51,6 +51,22 @@ poetry-content/themes/source/
 # Keep the poetry theme
 !poetry-content/themes/poetry-theme/
 
+blog-content/apps/
+blog-content/data/
+blog-content/files/
+blog-content/images/
+blog-content/logs/
+blog-content/media/
+blog-content/public/
+blog-content/settings/
+blog-content/themes/casper
+blog-content/themes/casper/
+blog-content/themes/source
+blog-content/themes/source/
+
+# Keep the blog theme
+!blog-content/themes/blog-theme/
+
 
 # =============================================================================
 # One-off SQL migration scripts (already applied)
@@ -58,8 +74,10 @@ poetry-content/themes/source/
 *.sql
 
 # =============================================================================
-# OS / editor noise
+# OS / editor / Python noise
 # =============================================================================
+__pycache__/
+*.pyc
 .DS_Store
 Thumbs.db
 *.swp

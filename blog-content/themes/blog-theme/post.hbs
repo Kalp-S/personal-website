@@ -1,0 +1,38 @@
+{{!< default}}
+
+{{#post}}
+<article class="post-full">
+    <div class="content-container">
+
+        <header class="post-full__header">
+            <h1 class="post-full__title">{{title}}</h1>
+            <div class="post-full__meta">
+                {{#if primary_tag}}
+                    <span class="tag">{{primary_tag.name}}</span>
+                {{/if}}
+                <time class="date" datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMMM D, YYYY"}}</time>
+                <span class="separator">&middot;</span>
+                <span class="reading-time">{{reading_time}}</span>
+            </div>
+        </header>
+
+        {{#if feature_image}}
+        <figure class="post-full__image">
+            <img src="{{feature_image}}" alt="{{#if feature_image_alt}}{{feature_image_alt}}{{else}}{{title}}{{/if}}">
+            {{#if feature_image_caption}}
+                <figcaption>{{feature_image_caption}}</figcaption>
+            {{/if}}
+        </figure>
+        {{/if}}
+
+        <section class="post-content">
+            {{content}}
+        </section>
+
+        <nav class="post-nav">
+            <a href="{{@site.url}}">&larr; Back to Blog</a>
+        </nav>
+
+    </div>
+</article>
+{{/post}}

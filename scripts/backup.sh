@@ -51,11 +51,20 @@ docker exec "${DB_CONTAINER}" \
     > "${TMP_DIR}/ghost_poetry_db.sql"
 log "ghost_poetry_db dump complete ($(du -sh "${TMP_DIR}/ghost_poetry_db.sql" | cut -f1))"
 
+log "Dumping MySQL database (ghost_blog_db)..."
+docker exec "${DB_CONTAINER}" \
+    mysqldump -u "${DB_USER}" -p"${DB_PASSWORD}" --default-character-set=utf8mb4 --no-tablespaces ghost_blog_db \
+    > "${TMP_DIR}/ghost_blog_db.sql"
+log "ghost_blog_db dump complete ($(du -sh "${TMP_DIR}/ghost_blog_db.sql" | cut -f1))"
+
 # 2. Copy content folders (images, media, themes, settings) and config files
 log "Copying Ghost content directories..."
 cp -r "${BLOG_DIR}/content" "${TMP_DIR}/"
 if [[ -d "${BLOG_DIR}/poetry-content" ]]; then
     cp -r "${BLOG_DIR}/poetry-content" "${TMP_DIR}/"
+fi
+if [[ -d "${BLOG_DIR}/blog-content" ]]; then
+    cp -r "${BLOG_DIR}/blog-content" "${TMP_DIR}/"
 fi
 
 log "Copying configuration files..."

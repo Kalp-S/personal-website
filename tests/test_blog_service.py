@@ -3,13 +3,14 @@
 Ghost Blog & MySQL Integration Test Suite
 =========================================
 Validates:
-1. Docker container status & MySQL database health (both main blog & poetry instances)
+1. Docker container status & MySQL database health (main blog, poetry, and blog instances)
 2. Ghost HTTP routing, theme asset rendering, and admin endpoint for kalp.dev
-3. Absence of poetry content, routes, and links on kalp.dev
+3. Absence of poetry & blog collection routes on kalp.dev
 4. Subdomain HTTP routing, theme rendering, and poem delivery on poetry.kalp.dev
-5. Backup pipeline integrity (MySQL dumps for both databases, content folders, configs)
-6. Google Drive rclone integration
-7. Systemd timer & service configurations
+5. Subdomain HTTP routing, theme rendering, and post delivery on blog.kalp.dev
+6. Backup pipeline integrity (MySQL dumps for all three databases, content folders, configs)
+7. Google Drive rclone integration
+8. Systemd timer & service configurations
 """
 
 import json
@@ -19,13 +20,17 @@ import unittest
 import urllib.error
 import urllib.request
 
-BASE_URL = os.environ.get("BLOG_BASE_URL", "http://127.0.0.1:2368")
+MAIN_BASE_URL = os.environ.get("MAIN_BASE_URL", "http://127.0.0.1:2368")
+BASE_URL = MAIN_BASE_URL
 POETRY_BASE_URL = os.environ.get("POETRY_BASE_URL", "http://127.0.0.1:2369")
-HOST_HEADER = os.environ.get("BLOG_HOST_HEADER", "kalp.dev")
+BLOG_BASE_URL = os.environ.get("BLOG_SUBDOMAIN_BASE_URL", "http://127.0.0.1:2370")
+HOST_HEADER = os.environ.get("MAIN_HOST_HEADER", "kalp.dev")
 POETRY_HOST_HEADER = os.environ.get("POETRY_HOST_HEADER", "poetry.kalp.dev")
+BLOG_HOST_HEADER = os.environ.get("BLOG_HOST_HEADER", "blog.kalp.dev")
 DB_CONTAINER = os.environ.get("DB_CONTAINER", "blog-db-1")
 SERVER_CONTAINER = os.environ.get("SERVER_CONTAINER", "blog-ghost-1")
 POETRY_SERVER_CONTAINER = os.environ.get("POETRY_SERVER_CONTAINER", "blog-ghost-poetry-1")
+BLOG_SERVER_CONTAINER = os.environ.get("BLOG_SERVER_CONTAINER", "blog-ghost-blog-1")
 
 
 class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -71,9 +76,11 @@ class TestDockerAndDatabaseHealth(unittest.TestCase):
 
         self.assertIn(SERVER_CONTAINER, containers, f"{SERVER_CONTAINER} is not running")
         self.assertIn(POETRY_SERVER_CONTAINER, containers, f"{POETRY_SERVER_CONTAINER} is not running")
+        self.assertIn(BLOG_SERVER_CONTAINER, containers, f"{BLOG_SERVER_CONTAINER} is not running")
         self.assertIn(DB_CONTAINER, containers, f"{DB_CONTAINER} is not running")
         self.assertTrue(containers[SERVER_CONTAINER].startswith("Up"), f"{SERVER_CONTAINER} is down")
         self.assertTrue(containers[POETRY_SERVER_CONTAINER].startswith("Up"), f"{POETRY_SERVER_CONTAINER} is down")
+        self.assertTrue(containers[BLOG_SERVER_CONTAINER].startswith("Up"), f"{BLOG_SERVER_CONTAINER} is down")
         self.assertTrue(containers[DB_CONTAINER].startswith("Up"), f"{DB_CONTAINER} is down")
 
     def test_mysql_table_integrity_main_db(self):
@@ -112,6 +119,24 @@ class TestDockerAndDatabaseHealth(unittest.TestCase):
         self.assertGreater(post_count, 0, "No posts found in ghost_poetry_db")
         self.assertGreater(settings_count, 0, "No settings configured in ghost_poetry_db")
 
+    def test_mysql_table_integrity_blog_db(self):
+        """Ensure critical Ghost MySQL database tables exist in ghost_blog_db."""
+        cmd = [
+            "docker", "exec", DB_CONTAINER,
+            "mysql", "-u", "ghost", "-pghostpassword", "-D", "ghost_blog_db",
+            "-N", "-e", "SELECT count(*) FROM posts; SELECT count(*) FROM users; SELECT count(*) FROM settings;"
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        counts = [line.strip() for line in res.stdout.strip().split("\n") if line.strip().isdigit()]
+        self.assertEqual(len(counts), 3, "Failed to query posts, users, and settings from MySQL ghost_blog_db")
+        post_count = int(counts[0])
+        user_count = int(counts[1])
+        settings_count = int(counts[2])
+
+        self.assertGreater(user_count, 0, "No users found in ghost_blog_db")
+        self.assertGreater(post_count, 0, "No posts found in ghost_blog_db")
+        self.assertGreater(settings_count, 0, "No settings configured in ghost_blog_db")
+
 
 class TestGhostWebRoutingAndTheme(unittest.TestCase):
     """Tests Ghost frontend rendering, HTTPS redirection, and theme assets for kalp.dev."""
@@ -148,6 +173,26 @@ class TestGhostWebRoutingAndTheme(unittest.TestCase):
         """Request to /poetry/ on kalp.dev should return 404."""
         status, headers, body = make_request("/poetry/", method="GET", with_forwarded_proto=True)
         self.assertEqual(status, 404)
+
+    def test_blog_route_returns_404_on_main_domain(self):
+        """Request to /blog/ on kalp.dev should return 404 since blog is hosted on subdomain."""
+        status, headers, body = make_request("/blog/", method="GET", with_forwarded_proto=True)
+        self.assertEqual(status, 404)
+
+    def test_homepage_links_to_blog_subdomain(self):
+        """Homepage on kalp.dev should link to https://blog.kalp.dev."""
+        status, headers, body = make_request("/", method="GET", with_forwarded_proto=True)
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        self.assertIn("https://blog.kalp.dev", html)
+
+    def test_homepage_renders_about_section(self):
+        """Homepage on kalp.dev should render the about section as the landing page."""
+        status, headers, body = make_request("/", method="GET", with_forwarded_proto=True)
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        self.assertIn("Hey, I am Kalp. 👋", html)
+        self.assertIn("Energy Toolbase", html)
 
     def test_http_to_https_redirect(self):
         """Request without forwarded HTTPS header should return 301 redirect to canonical HTTPS."""
@@ -203,6 +248,56 @@ class TestPoetrySubdomainRouting(unittest.TestCase):
         self.assertIn("poem-content", html)
 
 
+class TestBlogSubdomainRouting(unittest.TestCase):
+    """Tests Ghost frontend rendering and engineering articles on blog.kalp.dev."""
+
+    def test_blog_homepage_rendering(self):
+        """Homepage on blog.kalp.dev should return 200 OK with blog theme HTML."""
+        status, headers, body = make_request(
+            "/",
+            base_url=BLOG_BASE_URL,
+            host_header=BLOG_HOST_HEADER,
+            method="GET",
+            with_forwarded_proto=True
+        )
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        self.assertIn("Blog", html)
+        self.assertIn("The Art of Building Developer Tools", html)
+        self.assertIn("Why I Self-Host Everything", html)
+        self.assertIn("kalp.dev", html)
+
+    def test_blog_individual_post_rendering(self):
+        """Single post page on blog.kalp.dev should return 200 OK and render article content."""
+        status, headers, body = make_request(
+            "/the-art-of-building-developer-tools/",
+            base_url=BLOG_BASE_URL,
+            host_header=BLOG_HOST_HEADER,
+            method="GET",
+            with_forwarded_proto=True
+        )
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        self.assertIn("The Art of Building Developer Tools", html)
+        self.assertIn("developer tools", html)
+        self.assertIn("post-content", html)
+
+    def test_blog_self_host_post_rendering(self):
+        """Second post on blog.kalp.dev should return 200 OK and render self-hosting article."""
+        status, headers, body = make_request(
+            "/why-i-self-host-everything/",
+            base_url=BLOG_BASE_URL,
+            host_header=BLOG_HOST_HEADER,
+            method="GET",
+            with_forwarded_proto=True
+        )
+        self.assertEqual(status, 200)
+        html = body.decode("utf-8")
+        self.assertIn("Why I Self-Host Everything", html)
+        self.assertIn("Raspberry Pi", html)
+        self.assertIn("post-content", html)
+
+
 class TestBackupAndStoragePipeline(unittest.TestCase):
     """Validates the blog backup & restore scripts, archive contents, and Google Drive upload."""
 
@@ -229,7 +324,11 @@ class TestBackupAndStoragePipeline(unittest.TestCase):
         files = res.stdout.strip().split("\n")
 
         self.assertTrue(any("ghost_db.sql" in f for f in files), "ghost_db.sql missing from archive")
+        self.assertTrue(any("ghost_poetry_db.sql" in f for f in files), "ghost_poetry_db.sql missing from archive")
+        self.assertTrue(any("ghost_blog_db.sql" in f for f in files), "ghost_blog_db.sql missing from archive")
         self.assertTrue(any("content/" in f for f in files), "content/ directory missing from archive")
+        self.assertTrue(any("poetry-content/" in f for f in files), "poetry-content/ directory missing from archive")
+        self.assertTrue(any("blog-content/" in f for f in files), "blog-content/ directory missing from archive")
         self.assertTrue(any("docker-compose.yml" in f for f in files), "docker-compose.yml missing from archive")
 
     def test_rclone_gdrive_connectivity(self):
@@ -303,6 +402,19 @@ class TestMobileNavigation(unittest.TestCase):
         self.assertIn('class="nav-toggle"', content)
 
         css_path = "/home/kalp/git/blog/poetry-content/themes/poetry-theme/assets/css/style.css"
+        with open(css_path, "r", encoding="utf-8") as f:
+            css_content = f.read()
+        self.assertIn(".site-nav__links.open", css_content)
+
+    def test_blog_theme_mobile_nav(self):
+        """Blog theme must also have mobile navigation toggle markup and styles."""
+        header_path = "/home/kalp/git/blog/blog-content/themes/blog-theme/partials/header.hbs"
+        with open(header_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        self.assertNotIn("onclick=", content)
+        self.assertIn('class="nav-toggle"', content)
+
+        css_path = "/home/kalp/git/blog/blog-content/themes/blog-theme/assets/css/style.css"
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
         self.assertIn(".site-nav__links.open", css_content)

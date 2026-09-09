@@ -1,24 +1,26 @@
-# kalp.dev & poetry.kalp.dev — Personal Blog & Poetry Space
+# kalp.dev, blog.kalp.dev & poetry.kalp.dev — Personal Space & Subdomains
 
 Self-hosted [Ghost](https://ghost.org) instances running via Docker Compose on a local Ubuntu machine, exposed publicly through Cloudflare Tunnels:
-- **`https://kalp.dev`** — Software engineering blog, projects, resume, and technical writing.
+- **`https://kalp.dev`** — Personal hub, projects showcase, resume, and portfolio.
+- **`https://blog.kalp.dev`** — Software engineering blog, distributed systems, developer tools, and architecture writing.
 - **`https://poetry.kalp.dev`** — Dedicated space for poetry, verse, and creative writing.
 
 ## Stack
 
 | Component | Details |
 |---|---|
-| **CMS** | Ghost 5 (Alpine) — `ghost` (kalp.dev) & `ghost-poetry` (poetry.kalp.dev) |
-| **Database** | MySQL 8.0 (`ghost_db` & `ghost_poetry_db`) |
-| **Themes** | Custom `kalp-dev` theme & `poetry-theme` |
+| **CMS** | Ghost 5 (Alpine) — `ghost` (kalp.dev), `ghost-blog` (blog.kalp.dev) & `ghost-poetry` (poetry.kalp.dev) |
+| **Database** | MySQL 8.0 (`ghost_db`, `ghost_blog_db` & `ghost_poetry_db`) |
+| **Themes** | Custom `kalp-dev` theme, `blog-theme` & `poetry-theme` |
 | **Reverse proxy / TLS** | Cloudflare Tunnel (`cloudflared`) |
-| **Public URLs** | `https://kalp.dev` & `https://poetry.kalp.dev` |
+| **Public URLs** | `https://kalp.dev`, `https://blog.kalp.dev` & `https://poetry.kalp.dev` |
 
 ## Prerequisites
 
 - Docker + Docker Compose
 - [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/) configured with tunnel ingress routing:
   - `kalp.dev → localhost:2368`
+  - `blog.kalp.dev → localhost:2370`
   - `poetry.kalp.dev → localhost:2369`
 
 ## Setup
@@ -64,20 +66,22 @@ docker compose logs -f   # watch startup
 
 Ghost sites will be live at:
 - **https://kalp.dev** (Admin: `https://kalp.dev/ghost`)
+- **https://blog.kalp.dev** (Admin: `https://blog.kalp.dev/ghost`)
 - **https://poetry.kalp.dev** (Admin: `https://poetry.kalp.dev/ghost`)
 
 ## Custom Themes
 
 - **Main Theme (`kalp-dev`)**: Lives in [`content/themes/kalp-dev/`](./content/themes/kalp-dev/).
+- **Blog Theme (`blog-theme`)**: Lives in [`blog-content/themes/blog-theme/`](./blog-content/themes/blog-theme/).
 - **Poetry Theme (`poetry-theme`)**: Lives in [`poetry-content/themes/poetry-theme/`](./poetry-content/themes/poetry-theme/).
 
 After making changes, either:
-- Restart Ghost: `docker compose restart ghost ghost-poetry`
+- Restart Ghost: `docker compose restart ghost ghost-blog ghost-poetry`
 - Or upload via the Ghost admin panel: **Settings → Design → Upload theme**
 
 ## Backup & Restore
 
-Backups include full MySQL dumps for both databases (`ghost_db.sql` & `ghost_poetry_db.sql`) + Ghost content directories (`content/` & `poetry-content/`) + config files, stored in Google Drive (`gdrive:blog backups`). A systemd timer runs `scripts/backup.sh` daily at **2:30 AM**.
+Backups include full MySQL dumps for all databases (`ghost_db.sql`, `ghost_blog_db.sql` & `ghost_poetry_db.sql`) + Ghost content directories (`content/`, `blog-content/` & `poetry-content/`) + config files, stored in Google Drive (`gdrive:blog backups`). A systemd timer runs `scripts/backup.sh` daily at **2:30 AM**.
 
 ### Run a manual backup
 
@@ -89,7 +93,7 @@ Backups include full MySQL dumps for both databases (`ghost_db.sql` & `ghost_poe
 
 ```bash
 ./scripts/restore.sh               # interactive — lists Drive backups, you pick one
-./scripts/restore.sh ./backups/blog-backup-2026-08-17_04-00-57.tar.gz  # direct file
+./scripts/restore.sh ./backups/blog-backup-2026-09-09_04-16-17.tar.gz  # direct file
 ```
 
 > **Note:** Restore will prompt you to type `YES` before replacing MySQL database and content files.
@@ -116,7 +120,7 @@ An automated integration test suite is provided in `tests/test_blog_service.py`:
 docker compose logs -f
 
 # Restart Ghost instances
-docker compose restart ghost ghost-poetry
+docker compose restart ghost ghost-blog ghost-poetry
 
 # Stop everything
 docker compose down
@@ -129,24 +133,27 @@ docker compose pull && docker compose up -d
 
 ```
 .
-├── docker-compose.yml            # Ghost (main & poetry) + MySQL service definitions
+├── docker-compose.yml            # Ghost (main, blog & poetry) + MySQL service definitions
 ├── .env                          # Secrets & config (gitignored)
 ├── .env.example                  # Safe config template
 ├── scripts/
 │   ├── backup.sh                 # Daily backup script (multi-db & multi-content)
 │   ├── restore.sh                # Interactive restore script
 │   ├── test_blog.sh              # Integration test runner
-│   ├── migrate-poetry-out.sql    # Clean up SQL for kalp.dev
-│   └── seed-poetry-db.sql        # Seed SQL for poetry.kalp.dev
+│   ├── migrate-poetry-out.sql    # Clean up SQL for kalp.dev (poetry)
+│   ├── seed-poetry-db.sql        # Seed SQL for poetry.kalp.dev
+│   ├── migrate-blog-out.sql      # Clean up SQL for kalp.dev (blog)
+│   └── seed-blog-db.sql          # Seed SQL for blog.kalp.dev
 ├── tests/
 │   └── test_blog_service.py      # Python integration test suite
 ├── backups/                      # Local backup archives (gitignored)
 ├── content/
 │   └── themes/
 │       └── kalp-dev/             # Custom Ghost theme for kalp.dev
+├── blog-content/
+│   └── themes/
+│       └── blog-theme/           # Custom Ghost theme for blog.kalp.dev
 └── poetry-content/
     └── themes/
         └── poetry-theme/         # Custom Ghost theme for poetry.kalp.dev
 ```
-
-
