@@ -1,0 +1,48 @@
+{{!< default}}
+
+{{! Hero section }}
+<section class="hero">
+    <div class="container">
+        <h1 class="hero__title">Blog</h1>
+        <p class="hero__subtitle">by Kalp Shah</p>
+    </div>
+</section>
+
+{{! Feed of Blog Posts }}
+<section class="post-feed">
+    <div class="container">
+        <div class="post-grid">
+            {{#foreach posts}}
+            <article class="post-card">
+                <span class="post-card__tag post-card__tag--blog">Blog</span>
+                <h2 class="post-card__title">
+                    <a href="{{url}}">{{title}}</a>
+                </h2>
+                {{#if custom_excerpt}}
+                    <p class="post-card__excerpt">{{custom_excerpt}}</p>
+                {{else}}
+                    <p class="post-card__excerpt">{{excerpt words="30"}}</p>
+                {{/if}}
+                <div class="post-card__footer">
+                    <time class="post-card__meta" datetime="{{date format="YYYY-MM-DD"}}">{{date format="MMM D, YYYY"}}</time>
+                    <span class="separator">&middot;</span>
+                    <span class="reading-time">{{reading_time}}</span>
+                </div>
+            </article>
+            {{/foreach}}
+        </div>
+    </div>
+</section>
+
+{{! Pagination }}
+{{#if pagination.pages}}
+<nav class="pagination">
+    {{#if pagination.prev}}
+        <a href="{{pagination.prev}}">&larr; Newer</a>
+    {{/if}}
+    <span class="page-number">Page {{pagination.page}} of {{pagination.pages}}</span>
+    {{#if pagination.next}}
+        <a href="{{pagination.next}}">Older &rarr;</a>
+    {{/if}}
+</nav>
+{{/if}}

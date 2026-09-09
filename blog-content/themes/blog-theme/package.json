@@ -1,0 +1,16 @@
+{
+  "name": "blog-theme",
+  "description": "Clean engineering blog theme for blog.kalp.dev",
+  "version": "1.0.0",
+  "engines": {
+    "ghost": ">=5.0.0"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Kalp Shah",
+    "url": "https://kalp.dev"
+  },
+  "config": {
+    "posts_per_page": 10
+  }
+}

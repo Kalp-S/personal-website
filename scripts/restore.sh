@@ -116,7 +116,7 @@ log "Contents extracted."
 # =============================================================================
 log "Stopping Ghost containers (keeping MySQL running)..."
 cd "${BLOG_DIR}"
-docker compose stop ghost ghost-poetry 2>/dev/null || docker compose stop ghost
+docker compose stop ghost ghost-poetry ghost-blog 2>/dev/null || docker compose stop ghost
 log "Ghost stopped."
 
 # =============================================================================
@@ -136,6 +136,14 @@ if [[ -f "${TMP_DIR}/ghost_poetry_db.sql" ]]; then
     log "✅ MySQL database 'ghost_poetry_db' restored."
 fi
 
+if [[ -f "${TMP_DIR}/ghost_blog_db.sql" ]]; then
+    log "Restoring MySQL database 'ghost_blog_db' from dump..."
+    docker exec -i "${DB_CONTAINER}" \
+        mysql -u "${DB_USER}" -p"${DB_PASSWORD}" --default-character-set=utf8mb4 ghost_blog_db \
+        < "${TMP_DIR}/ghost_blog_db.sql"
+    log "✅ MySQL database 'ghost_blog_db' restored."
+fi
+
 # =============================================================================
 # Step 6 — Restore Content Directories
 # =============================================================================
@@ -149,6 +157,12 @@ if [[ -d "${TMP_DIR}/poetry-content" ]]; then
     log "Restoring poetry content directory..."
     cp -r "${TMP_DIR}/poetry-content" "${BLOG_DIR}/"
     log "✅ Poetry content directory restored."
+fi
+
+if [[ -d "${TMP_DIR}/blog-content" ]]; then
+    log "Restoring blog content directory..."
+    cp -r "${TMP_DIR}/blog-content" "${BLOG_DIR}/"
+    log "✅ Blog content directory restored."
 fi
 
 # =============================================================================
@@ -180,10 +194,10 @@ fi
 # Step 8 — Restart Ghost
 # =============================================================================
 log "Starting Ghost containers..."
-docker compose start ghost ghost-poetry 2>/dev/null || docker compose start ghost
+docker compose start ghost ghost-poetry ghost-blog 2>/dev/null || docker compose start ghost
 log "✅ Ghost started."
 
 echo ""
-log "🎉 Restore complete! Ghost blogs are back up at https://kalp.dev and https://poetry.kalp.dev"
+log "🎉 Restore complete! Ghost blogs are back up at https://kalp.dev, https://blog.kalp.dev, and https://poetry.kalp.dev"
 log "   Restored from: $(basename "${ARCHIVE_PATH}")"
 
