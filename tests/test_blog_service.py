@@ -179,12 +179,13 @@ class TestGhostWebRoutingAndTheme(unittest.TestCase):
         status, headers, body = make_request("/blog/", method="GET", with_forwarded_proto=True)
         self.assertEqual(status, 404)
 
-    def test_homepage_links_to_blog_subdomain(self):
-        """Homepage on kalp.dev should link to https://blog.kalp.dev."""
+    def test_homepage_has_no_blog_section(self):
+        """Homepage on kalp.dev should not contain blog section or blog links."""
         status, headers, body = make_request("/", method="GET", with_forwarded_proto=True)
         self.assertEqual(status, 200)
         html = body.decode("utf-8")
-        self.assertIn("https://blog.kalp.dev", html)
+        self.assertNotIn("https://blog.kalp.dev", html)
+        self.assertNotIn("Blog ↗", html)
 
     def test_homepage_renders_about_section(self):
         """Homepage on kalp.dev should render the about section as the landing page."""
