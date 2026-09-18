@@ -858,6 +858,43 @@ img {
   border-color: rgba(193, 96, 77, 0.3);
 }
 
+.project-card--pinned {
+  border: 2px solid var(--accent-coral);
+  box-shadow: 0 4px 20px rgba(193, 96, 77, 0.12);
+  background: linear-gradient(180deg, #ffffff 0%, #fefcfb 100%);
+  position: relative;
+}
+
+.project-card--pinned:hover {
+  border-color: var(--accent-coral-hover);
+  box-shadow: 0 8px 30px rgba(193, 96, 77, 0.2);
+  transform: translateY(-4px);
+}
+
+.project-pin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-coral);
+  background: rgba(193, 96, 77, 0.08);
+  border: 1px solid rgba(193, 96, 77, 0.25);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  margin-bottom: var(--space-md);
+  width: fit-content;
+}
+
+.project-pin-badge svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
 .project-card__tags {
   display: flex;
   flex-wrap: wrap;
