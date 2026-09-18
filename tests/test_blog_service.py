@@ -32,6 +32,20 @@ SERVER_CONTAINER = os.environ.get("SERVER_CONTAINER", "blog-ghost-1")
 POETRY_SERVER_CONTAINER = os.environ.get("POETRY_SERVER_CONTAINER", "blog-ghost-poetry-1")
 BLOG_SERVER_CONTAINER = os.environ.get("BLOG_SERVER_CONTAINER", "blog-ghost-blog-1")
 
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+IS_CI = os.environ.get("CI") == "true" or "GITHUB_ACTIONS" in os.environ
+
+
+def resolve_repo_path(*subpaths):
+    p1 = os.path.join(REPO_ROOT, *subpaths)
+    if os.path.exists(p1):
+        return p1
+    p2 = os.path.join("/home/kalp/git/blog", *subpaths)
+    if os.path.exists(p2):
+        return p2
+    return p1
+
+
 
 class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
     """Prevents automatic redirection so tests can inspect 301/302 responses."""
@@ -62,6 +76,7 @@ def make_request(path, base_url=BASE_URL, host_header=HOST_HEADER, method="GET",
         return 0, {}, str(e).encode("utf-8")
 
 
+@unittest.skipIf(IS_CI, "Docker and MySQL database tests require host environment")
 class TestDockerAndDatabaseHealth(unittest.TestCase):
     """Verifies Docker containers and MySQL database connectivity."""
 
@@ -138,6 +153,7 @@ class TestDockerAndDatabaseHealth(unittest.TestCase):
         self.assertGreater(settings_count, 0, "No settings configured in ghost_blog_db")
 
 
+@unittest.skipIf(IS_CI, "Ghost web routing tests require local running Ghost instance")
 class TestGhostWebRoutingAndTheme(unittest.TestCase):
     """Tests Ghost frontend rendering, HTTPS redirection, and theme assets for kalp.dev."""
 
@@ -214,6 +230,7 @@ class TestGhostWebRoutingAndTheme(unittest.TestCase):
         self.assertIn(status, (200, 302))
 
 
+@unittest.skipIf(IS_CI, "Ghost poetry routing tests require local running Ghost instance")
 class TestPoetrySubdomainRouting(unittest.TestCase):
     """Tests Ghost frontend rendering and poem serving on poetry.kalp.dev."""
 
@@ -249,6 +266,7 @@ class TestPoetrySubdomainRouting(unittest.TestCase):
         self.assertIn("poem-content", html)
 
 
+@unittest.skipIf(IS_CI, "Ghost blog routing tests require local running Ghost instance")
 class TestBlogSubdomainRouting(unittest.TestCase):
     """Tests Ghost frontend rendering and engineering articles on blog.kalp.dev."""
 
@@ -305,10 +323,11 @@ class TestBackupAndStoragePipeline(unittest.TestCase):
     def test_scripts_exist_and_executable(self):
         """Ensure backup.sh and restore.sh are present and executable."""
         for script in ["backup.sh", "restore.sh"]:
-            path = f"/home/kalp/git/blog/scripts/{script}"
-            self.assertTrue(os.path.isfile(path), f"{script} not found")
+            path = resolve_repo_path("scripts", script)
+            self.assertTrue(os.path.isfile(path), f"{script} not found at {path}")
             self.assertTrue(os.access(path, os.X_OK), f"{script} is not executable")
 
+    @unittest.skipIf(IS_CI, "Local backup archive tests require host environment")
     def test_local_backup_archive_integrity(self):
         """Ensure local backup archive exists and contains ghost_db.sql, content, and configs."""
         backup_dir = "/home/kalp/git/blog/backups"
@@ -332,6 +351,7 @@ class TestBackupAndStoragePipeline(unittest.TestCase):
         self.assertTrue(any("blog-content/" in f for f in files), "blog-content/ directory missing from archive")
         self.assertTrue(any("docker-compose.yml" in f for f in files), "docker-compose.yml missing from archive")
 
+    @unittest.skipIf(IS_CI, "Google Drive rclone tests require host credentials")
     def test_rclone_gdrive_connectivity(self):
         """Ensure rclone can connect to Google Drive and list blog backups folder."""
         res = subprocess.run(
@@ -341,6 +361,7 @@ class TestBackupAndStoragePipeline(unittest.TestCase):
         self.assertIn(".tar.gz", res.stdout, "No archives found in remote Google Drive blog backups")
 
 
+@unittest.skipIf(IS_CI, "Systemd integration tests require host systemd service")
 class TestSystemdTimerIntegration(unittest.TestCase):
     """Validates that systemd units for blog backup are configured and active."""
 
@@ -366,7 +387,7 @@ class TestMobileNavigation(unittest.TestCase):
 
     def test_kalp_dev_header_nav_markup(self):
         """Header partial must not have conflicting inline onclick and must have aria-expanded."""
-        header_path = "/home/kalp/git/blog/content/themes/kalp-dev/partials/header.hbs"
+        header_path = resolve_repo_path("content", "themes", "kalp-dev", "partials", "header.hbs")
         with open(header_path, "r", encoding="utf-8") as f:
             content = f.read()
         self.assertNotIn("onclick=", content, "Inline onclick handler found in header.hbs")
@@ -376,7 +397,7 @@ class TestMobileNavigation(unittest.TestCase):
 
     def test_kalp_dev_main_js_logic(self):
         """main.js must contain robust mobile toggle, click-outside, and escape key handlers."""
-        js_path = "/home/kalp/git/blog/content/themes/kalp-dev/assets/js/main.js"
+        js_path = resolve_repo_path("content", "themes", "kalp-dev", "assets", "js", "main.js")
         with open(js_path, "r", encoding="utf-8") as f:
             content = f.read()
         self.assertIn("nav-toggle", content)
@@ -386,7 +407,7 @@ class TestMobileNavigation(unittest.TestCase):
 
     def test_kalp_dev_style_responsive_rules(self):
         """style.css must have responsive mobile navigation rules and animations."""
-        css_path = "/home/kalp/git/blog/content/themes/kalp-dev/assets/css/style.css"
+        css_path = resolve_repo_path("content", "themes", "kalp-dev", "assets", "css", "style.css")
         with open(css_path, "r", encoding="utf-8") as f:
             content = f.read()
         self.assertIn(".nav-toggle.open span:nth-child(1)", content)
@@ -396,30 +417,31 @@ class TestMobileNavigation(unittest.TestCase):
 
     def test_poetry_theme_mobile_nav(self):
         """Poetry theme must also have mobile navigation toggle markup and styles."""
-        header_path = "/home/kalp/git/blog/poetry-content/themes/poetry-theme/partials/header.hbs"
+        header_path = resolve_repo_path("poetry-content", "themes", "poetry-theme", "partials", "header.hbs")
         with open(header_path, "r", encoding="utf-8") as f:
             content = f.read()
         self.assertNotIn("onclick=", content)
         self.assertIn('class="nav-toggle"', content)
 
-        css_path = "/home/kalp/git/blog/poetry-content/themes/poetry-theme/assets/css/style.css"
+        css_path = resolve_repo_path("poetry-content", "themes", "poetry-theme", "assets", "css", "style.css")
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
         self.assertIn(".site-nav__links.open", css_content)
 
     def test_blog_theme_mobile_nav(self):
         """Blog theme must also have mobile navigation toggle markup and styles."""
-        header_path = "/home/kalp/git/blog/blog-content/themes/blog-theme/partials/header.hbs"
+        header_path = resolve_repo_path("blog-content", "themes", "blog-theme", "partials", "header.hbs")
         with open(header_path, "r", encoding="utf-8") as f:
             content = f.read()
         self.assertNotIn("onclick=", content)
         self.assertIn('class="nav-toggle"', content)
 
-        css_path = "/home/kalp/git/blog/blog-content/themes/blog-theme/assets/css/style.css"
+        css_path = resolve_repo_path("blog-content", "themes", "blog-theme", "assets", "css", "style.css")
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
         self.assertIn(".site-nav__links.open", css_content)
 
+    @unittest.skipIf(IS_CI, "Rendered homepage test requires local running Ghost instance")
     def test_rendered_homepage_contains_mobile_toggle(self):
         """Rendered homepage HTML must include the mobile navigation toggle and link to main.js."""
         status, headers, body = make_request(
@@ -436,6 +458,7 @@ class TestMobileNavigation(unittest.TestCase):
         self.assertIn('assets/js/main.js', html)
 
 
+@unittest.skipIf(IS_CI, "Live HTTP text encoding tests require local running Ghost instance")
 class TestTextEncodingAndMojibake(unittest.TestCase):
     """Verifies that pages and database entries do not contain corrupted Mojibake characters."""
 
